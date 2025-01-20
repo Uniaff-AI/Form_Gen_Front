@@ -95,6 +95,9 @@
             <button @click="deleteCountry(index)" class="button is-danger is-small is-rounded">
               Удалить
             </button>
+            <button @click="editCountry(index)" class="button is-info is-small is-rounded">
+              Редактировать
+            </button>
           </td>
         </tr>
         </tbody>
@@ -119,6 +122,7 @@ export default {
         language: '',
         actions: '', // Описание
       },
+      selectedCountryIndex: null, // Индекс выбранной страны для редактирования
     };
   },
   methods: {
@@ -155,6 +159,7 @@ export default {
         language: '',
         actions: '',
       };
+      this.selectedCountryIndex = null;
     },
 
     // Удаление страны
@@ -167,7 +172,27 @@ export default {
       } catch (error) {
         console.error('Ошибка при удалении страны:', error);
       }
-    }
+    },
+
+    // Редактирование страны
+    editCountry(index) {
+      this.selectedCountryIndex = index;
+      const country = this.countries[index];
+      this.newCountry = { ...country };
+      this.showCountryForm = true;
+    },
+
+    // Обновление страны
+    async updateCountry() {
+      const updatedCountry = this.newCountry;
+      try {
+        await axios.put(`http://localhost:8000/api/countries/${updatedCountry.code}`, updatedCountry);
+        this.countries[this.selectedCountryIndex] = updatedCountry;
+        this.cancelCountryForm();
+      } catch (error) {
+        console.error('Ошибка при обновлении страны:', error);
+      }
+    },
   },
   mounted() {
     // Загружаем список стран при монтировании компонента

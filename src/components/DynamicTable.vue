@@ -185,7 +185,8 @@ export default {
       geoData: [],
       currentPage: 1,
       totalPages: 1,
-      offersPerPage: 10
+      offersPerPage: 10,
+      selectedCountry: '',  // Добавленное поле для выбранной страны
     };
   },
   computed: {
@@ -199,13 +200,16 @@ export default {
   watch: {
     searchQuery() {
       this.filterOffers();
+    },
+    selectedCountry() {
+      this.fetchOffers();  // Загружаем офферы при смене страны
     }
   },
   methods: {
-    // Загружаем офферы
+    // Загружаем офферы для выбранной страны
     async fetchOffers() {
       try {
-        const response = await api.get('/api/offers/');
+        const response = await api.get(`/api/offers/?country=${this.selectedCountry}`);
         this.offers = response.data.map(offer => ({
           ...offer,
           buttonText: offer.button_text,
@@ -232,7 +236,6 @@ export default {
     filterOffers() {
       const query = this.searchQuery.toLowerCase();
       this.filteredOffers = this.offers.filter(offer =>
-          // Проверка на наличие значений перед вызовом toLowerCase()
           (offer.offer && offer.offer.toLowerCase().includes(query)) ||
           (offer.geo && offer.geo.toLowerCase().includes(query))
       );
@@ -318,11 +321,12 @@ export default {
 
   // При монтировании компонента, загружаем данные
   mounted() {
-    this.fetchOffers();
     this.fetchGeoData();
+    this.fetchOffers();
   }
 };
 </script>
+
 
 <style scoped>
 /* Полоса на всю ширину страницы */
