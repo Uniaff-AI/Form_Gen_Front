@@ -232,7 +232,8 @@ export default {
     filterOffers() {
       const query = this.searchQuery.toLowerCase();
       this.filteredOffers = this.offers.filter(offer =>
-          offer.offer.toLowerCase().includes(query) ||
+          // Проверка на наличие значений перед вызовом toLowerCase()
+          (offer.offer && offer.offer.toLowerCase().includes(query)) ||
           (offer.geo && offer.geo.toLowerCase().includes(query))
       );
       this.totalPages = Math.ceil(this.filteredOffers.length / this.offersPerPage);
