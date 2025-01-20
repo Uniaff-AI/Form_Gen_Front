@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Полоса с кнопками на всю ширину страницы -->
     <div class="full-width-bar">
       <div class="bar-content">
         <router-link to="/geo" class="bar-item">GEO</router-link>
@@ -27,7 +26,7 @@
 
       <!-- Форма для добавления нового оффера -->
       <div v-if="showForm" class="modal is-active">
-        <div class="modal-background"></div>
+        <div class="modal-background" @click="cancelForm"></div>
         <div class="modal-content">
           <div class="field">
             <label class="label">Оффер</label>
@@ -39,9 +38,9 @@
             <label class="label">Гео</label>
             <div class="control">
               <div class="select">
-                <select v-model="newOffer.geo">
+                <select v-model="newOffer.geo" @change="setCountryCode">
                   <option value="">Выберите страну</option>
-                  <option v-for="geo in geoData" :key="geo.id" :value="geo.name">
+                  <option v-for="geo in geoData" :key="geo.code" :value="geo.name">
                     {{ geo.name }}
                   </option>
                 </select>
@@ -106,7 +105,7 @@
           <td>{{ offer.geo }}</td>
           <td>{{ offer.price }}</td>
           <td>{{ offer.discount }}</td>
-          <td>{{ offer.buttonText ? offer.buttonText : 'Нет текста' }}</td>
+          <td>{{ offer.buttonText || 'Нет текста' }}</td>
           <td>{{ offer.description }}</td>
           <td>
             <a :href="offer.image" target="_blank">
@@ -137,13 +136,13 @@
       <nav class="pagination is-centered" role="navigation" aria-label="pagination">
         <a class="pagination-previous"
            :disabled="currentPage === 1"
-           @click="currentPage > 1 && currentPage--"
+           @click="changePage(currentPage - 1)"
            :class="{'disabled': currentPage === 1}">
           Назад
         </a>
         <a class="pagination-next"
            :disabled="currentPage === totalPages"
-           @click="currentPage < totalPages && currentPage++"
+           @click="changePage(currentPage + 1)"
            :class="{'disabled': currentPage === totalPages}">
           Вперед
         </a>
@@ -151,7 +150,7 @@
           <li v-for="page in totalPages" :key="page">
             <a class="pagination-link"
                :class="{'is-current': page === currentPage}"
-               @click="currentPage = page">
+               @click="changePage(page)">
               {{ page }}
             </a>
           </li>
@@ -160,6 +159,8 @@
     </div>
   </div>
 </template>
+
+
 <script>
 import api from '@/services/api';
 
@@ -167,27 +168,28 @@ export default {
   name: 'DynamicTable',
   data() {
     return {
-      showForm: false, // Флаг для отображения формы добавления оффера
-      searchQuery: '', // Текст поиска
+      showForm: false,
+      searchQuery: '',
       newOffer: {
         offer: '',
-        geo: '', // Выбранная страна
+        geo: '', // Название страны
+        countryCode: '', // Код страны
         price: null,
         discount: null,
         buttonText: '',
         description: '',
         image: ''
       },
-      offers: [], // Все офферы
-      filteredOffers: [], // Офферы после фильтрации
-      geoData: [], // Список стран
-      currentPage: 1, // Текущая страница для пагинации
-      totalPages: 1, // Количество страниц для пагинации
-      offersPerPage: 10 // Количество офферов на странице
+      offers: [],
+      filteredOffers: [],
+      geoData: [],
+      currentPage: 1,
+      totalPages: 1,
+      offersPerPage: 10
     };
   },
   computed: {
-    // Вычисляем пагинированные офферы
+    // Пагинация: выбираем офферы для текущей страницы
     paginatedOffers() {
       const start = (this.currentPage - 1) * this.offersPerPage;
       const end = start + this.offersPerPage;
@@ -195,119 +197,131 @@ export default {
     }
   },
   watch: {
-    // Наблюдаем за изменением searchQuery для автоматической фильтрации
     searchQuery() {
       this.filterOffers();
     }
   },
   methods: {
-    // Метод для загрузки всех офферов
+    // Загружаем офферы
     async fetchOffers() {
       try {
         const response = await api.get('/api/offers/');
         this.offers = response.data.map(offer => ({
           ...offer,
-          buttonText: offer.button_text,  // Преобразуем данные с бэка
+          buttonText: offer.button_text,
         }));
-        this.filterOffers(); // Применяем фильтрацию
+        this.filterOffers();
       } catch (error) {
         console.error('Ошибка при загрузке офферов:', error);
         alert('Не удалось загрузить офферы. Пожалуйста, попробуйте позже.');
       }
     },
 
-    // Запрос на получение данных Geo (список стран)
+    // Загружаем данные стран (гео)
     async fetchGeoData() {
       try {
         const response = await api.get('/api/countries/');
-        this.geoData = response.data; // Сохраняем список стран в geoData
+        this.geoData = response.data;
       } catch (error) {
         console.error('Ошибка при загрузке списка стран:', error);
         alert('Не удалось загрузить список стран. Пожалуйста, попробуйте позже.');
       }
     },
 
-    // Метод для фильтрации офферов по поисковому запросу
+    // Фильтрация офферов по поисковому запросу
     filterOffers() {
-      const query = this.searchQuery.toLowerCase(); // Приводим запрос к нижнему регистру
-
-      if (query === '') {
-        this.filteredOffers = [...this.offers]; // Если запрос пустой, показываем все офферы
-      } else {
-        // Фильтруем офферы по названию, гео, тексту кнопки или описанию
-        this.filteredOffers = this.offers.filter(offer =>
-            (offer.offer && offer.offer.toLowerCase().includes(query)) ||
-            (offer.geo && offer.geo.toLowerCase().includes(query)) ||
-            (offer.buttonText && offer.buttonText.toLowerCase().includes(query)) ||
-            (offer.description && offer.description.toLowerCase().includes(query))
-        );
-      }
-
-      this.updatePagination(); // Обновляем пагинацию
-      this.currentPage = 1; // Сбрасываем на первую страницу
-    },
-
-    // Метод для обновления количества страниц в пагинации
-    updatePagination() {
+      const query = this.searchQuery.toLowerCase();
+      this.filteredOffers = this.offers.filter(offer =>
+          offer.offer.toLowerCase().includes(query) ||
+          (offer.geo && offer.geo.toLowerCase().includes(query))
+      );
       this.totalPages = Math.ceil(this.filteredOffers.length / this.offersPerPage);
     },
 
-    // Метод для добавления нового оффера
+    // Добавление нового оффера
     async addOffer() {
-      if (!this.newOffer.offer || !this.newOffer.geo || !this.newOffer.price) {
-        alert('Пожалуйста, заполните обязательные поля.');
+      // Проверка на обязательные поля
+      if (!this.newOffer.offer || !this.newOffer.geo || this.newOffer.price == null || this.newOffer.discount == null || !this.newOffer.image) {
+        alert('Пожалуйста, заполните все обязательные поля!');
         return;
       }
 
+      // Проверка на корректность URL изображения
+      if (!this.isValidUrl(this.newOffer.image)) {
+        alert('Пожалуйста, укажите корректный URL для изображения.');
+        return;
+      }
+
+      // Отправка оффера на сервер
       try {
-        const response = await api.post('/generate_offer/', this.newOffer); // Изменено на правильный путь
+        const response = await api.post('/generate_offer/', this.newOffer);
         this.offers.push(response.data);
-        this.newOffer = { offer: '', geo: '', price: null, discount: null, buttonText: '', description: '', image: ''}; // Очистка формы
+        this.filterOffers();
         this.showForm = false;
-        this.filterOffers(); // Перезагружаем фильтрацию и пагинацию
-        alert('Оффер успешно добавлен!');
+        this.cancelForm();
       } catch (error) {
         console.error('Ошибка при добавлении оффера:', error);
         alert('Не удалось добавить оффер. Пожалуйста, попробуйте позже.');
       }
     },
 
-    // Метод для отмены добавления оффера
+    // Закрытие формы добавления оффера
     cancelForm() {
       this.showForm = false;
-      this.newOffer = { offer: '', geo: '', price: null, discount: null, buttonText: '', description: '', image: '' }; // Сброс формы
+      this.newOffer = {
+        offer: '',
+        geo: '',
+        countryCode: '', // Очистка кода страны
+        price: null,
+        discount: null,
+        buttonText: '',
+        description: '',
+        image: ''
+      };
     },
 
-    // Метод для удаления оффера
+    // Удаление оффера
     async deleteOffer(id) {
-      const confirmDelete = confirm('Вы уверены, что хотите удалить этот оффер?');
-      if (!confirmDelete) return;
-
       try {
-        await api.delete(`/api/offers/${id}`);
+        await api.delete(`/api/offers/${id}/`);
         this.offers = this.offers.filter(offer => offer.id !== id);
-        this.filterOffers(); // Перезапускаем фильтрацию и пагинацию
-        alert('Оффер удален.');
+        this.filterOffers();
       } catch (error) {
         console.error('Ошибка при удалении оффера:', error);
         alert('Не удалось удалить оффер. Пожалуйста, попробуйте позже.');
       }
     },
 
-    // Метод для изменения страницы
+    // Обработчик выбора страны из выпадающего списка
+    setCountryCode() {
+      // Находим страну по имени и сохраняем её код
+      const selectedCountry = this.geoData.find(country => country.name === this.newOffer.geo);
+      if (selectedCountry) {
+        this.newOffer.countryCode = selectedCountry.code;
+      }
+    },
+
+    // Пагинация: смена страницы
     changePage(page) {
-      if (page < 1 || page > this.totalPages) return;
-      this.currentPage = page;
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    },
+
+    // Проверка на валидный URL
+    isValidUrl(url) {
+      const pattern = /^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
+      return pattern.test(url);
     }
   },
 
+  // При монтировании компонента, загружаем данные
   mounted() {
-    this.fetchOffers(); // Загружаем офферы при монтировании компонента
-    this.fetchGeoData(); // Загружаем список стран при монтировании компонента
+    this.fetchOffers();
+    this.fetchGeoData();
   }
 };
 </script>
-
 
 <style scoped>
 /* Полоса на всю ширину страницы */
