@@ -336,7 +336,7 @@ export default {
 <style scoped>
 /* Полоса на всю ширину страницы */
 .full-width-bar {
-  background-color: #1a73e8; /* Голубой цвет полосы */
+  background-color: #1e1e1e; /* Темный цвет полосы */
   padding: 20px 0; /* Увеличиваем padding для увеличения высоты полосы */
   width: 100%;
 }
@@ -347,20 +347,21 @@ export default {
 }
 
 .bar-item {
-  color: white;
+  color: #f1f1f1;
   font-weight: bold;
   padding: 0 20px;
   text-decoration: none;
 }
 
 .bar-item:hover {
-  background-color: #0059b3;
+  background-color: #333;
 }
 
 /* Основной фон страницы */
 body {
-  background-color: #f9fafb; /* Светлый фон для всей страницы */
+  background-color: #121212; /* Очень темный фон */
   font-family: 'Roboto', sans-serif; /* Приятный шрифт */
+  color: #e0e0e0; /* Светлый цвет текста */
 }
 
 /* Контейнер с ограничением ширины и отступами */
@@ -368,20 +369,20 @@ body {
   max-width: 1200px;
   margin: auto;
   padding: 20px;
-  background-color: white;
+  background-color: #1f1f1f; /* Темный фон контейнера */
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Легкая тень для контейнера */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Легкая тень для контейнера */
   margin-top: 30px; /* Добавляем отступ сверху, чтобы таблица не была в упор к полосе */
 }
 
 /* Кнопка "Добавить Оффер" такого же цвета, как и полоса сверху */
 .add-offer-button {
-  background-color: #1a73e8; /* Цвет полосы сверху */
-  color: white;
+  background-color: #1e1e1e; /* Темный цвет кнопки */
+  color: #f1f1f1;
 }
 
 .add-offer-button:hover {
-  background-color: #0059b3; /* Тёмный голубой при наведении */
+  background-color: #333; /* Тёмный серый при наведении */
 }
 
 /* Стили для пагинации */
@@ -394,29 +395,29 @@ body {
 
 .pagination-previous,
 .pagination-next {
-  color: #1a73e8; /* Цвет кнопок по умолчанию */
+  color: #1e88e5; /* Голубой цвет кнопок по умолчанию */
 }
 
 .pagination-previous.disabled,
 .pagination-next.disabled {
-  color: #a0c1e3; /* Тускло голубой цвет, когда кнопки неактивны */
+  color: #666; /* Тускло серый цвет, когда кнопки неактивны */
   cursor: not-allowed; /* Убираем возможность клика */
 }
 
 .pagination-previous:hover:not(.disabled),
 .pagination-next:hover:not(.disabled) {
-  background-color: #f1f1f1; /* При наведении на активные кнопки */
+  background-color: #333; /* При наведении на активные кнопки */
 }
 
 .pagination-link {
-  color: #1a73e8;
+  color: #1e88e5;
   padding: 0.5rem 1rem;
   margin: 0 3px;
   cursor: pointer;
 }
 
 .pagination-link.is-current {
-  background-color: #1a73e8;
+  background-color: #1e88e5;
   color: white;
 }
 
@@ -430,11 +431,11 @@ body {
 }
 
 .fas {
-  color: #1a73e8;
+  color: #1e88e5;
 }
 
 .fas:hover {
-  color: #0059b3;
+  color: #039be5;
 }
 
 /* Стиль для кнопок */
@@ -445,21 +446,21 @@ body {
 }
 
 .button.is-primary {
-  background-color: #1a73e8;
+  background-color: #1e88e5;
   color: white;
 }
 
 .button.is-primary:hover {
-  background-color: #0059b3; /* Тёмный голубой при наведении */
+  background-color: #039be5; /* Голубой при наведении */
 }
 
 .button.is-light {
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: #333;
+  color: #ccc;
 }
 
 .button.is-light:hover {
-  background-color: #e0e0e0;
+  background-color: #444;
 }
 
 .button.is-danger {
@@ -475,9 +476,9 @@ body {
   width: 60%;
   max-width: 900px;
   padding: 20px;
-  background-color: #fff;
+  background-color: #212121; /* Темный фон для модального окна */
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .modal-close.is-large {
@@ -489,19 +490,51 @@ body {
 }
 
 .modal-close.is-large:hover {
-  color: #333;
+  color: #fff;
 }
 
-.table a {
-  color: #1a73e8; /* Голубой цвет ссылок */
+/* Таблица */
+.table {
+  width: 100%;
+  background-color: #181818; /* Черный фон таблицы */
+  color: #e0e0e0; /* Светлый текст для таблицы */
+  border-collapse: collapse; /* Убираем отступы между ячейками */
 }
 
-.table a:hover {
+.table th,
+.table td {
+  border: 1px solid #333; /* Темные границы ячеек */
+  padding: 10px;
+  text-align: left;
+}
+
+.table th {
+  background-color: #222; /* Темный фон для заголовков */
+  font-weight: bold;
+  color: #e0e0e0; /* Белый текст в заголовках */
+}
+
+.table tr:nth-child(odd) {
+  background-color: #242424; /* Чередующиеся строки с темным фоном */
+}
+
+.table tr:nth-child(even) {
+  background-color: #1f1f1f; /* Чередующиеся строки с чуть светлее темным фоном */
+}
+
+.table tr:hover {
+  background-color: #333; /* Подсветка строки при наведении */
+}
+
+.table td a {
+  color: #1e88e5; /* Голубой цвет для ссылок в таблице */
+}
+
+.table td a:hover {
   text-decoration: underline;
 }
 
-/* Стиль для иконок изображения */
-.table td a .icon {
+.table td .icon {
   font-size: 2.5rem; /* Увеличиваем размер иконки */
   display: flex; /* Включаем flexbox для центрирования */
   justify-content: center; /* Горизонтальное центрирование */
@@ -521,17 +554,18 @@ body {
   border-radius: 4px; /* Легкое округление */
   padding: 0.5rem 1rem;
   font-size: 1rem;
-  border: 1px solid #ddd;
-  background-color: #f9fafb;
+  border: 1px solid #555;
+  background-color: #333; /* Темный фон для полей ввода */
+  color: #f1f1f1;
 }
 
 .input:focus {
-  border-color: #1a73e8; /* Голубая обводка при фокусе */
+  border-color: #1e88e5; /* Голубая обводка при фокусе */
   outline: none;
 }
 
 .input.is-rounded {
-  border-radius: 4px; /* Легкое округление, а не сильное */
+  border-radius: 4px; /* Легкое округление */
 }
 
 /* Стили для формы */
@@ -542,6 +576,7 @@ body {
 .form-control label {
   font-weight: bold;
   margin-bottom: 0.5rem;
+  color: #f1f1f1; /* Белый текст для меток */
 }
 
 .form-control .input {
@@ -556,14 +591,12 @@ body {
 
 /* Стили для кнопки "Открыть" */
 .open-link {
-  background-color: #1a73e8;
+  background-color: #1e88e5;
   color: white;
   font-size: 0.875rem;
 }
 
 .open-link:hover {
-  background-color: #0059b3;
+  background-color: #039be5;
 }
-
-
 </style>
