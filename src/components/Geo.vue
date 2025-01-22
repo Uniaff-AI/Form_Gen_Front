@@ -107,7 +107,7 @@
 </template>
 
 <script>
-import axios from 'axios'; // Для работы с HTTP запросами
+import api from '@/services/api'; // Импортируем api сервис
 
 export default {
   name: "Geo",
@@ -129,7 +129,7 @@ export default {
     // Получение списка стран с сервера
     async getCountries() {
       try {
-        const response = await axios.get('http://localhost:8000/api/countries/');
+        const response = await api.get('/api/countries/'); // Используем api для запроса
         this.countries = response.data;
       } catch (error) {
         console.error('Ошибка при получении стран:', error);
@@ -139,7 +139,7 @@ export default {
     // Добавление новой страны
     async addCountry() {
       try {
-        const response = await axios.post('http://localhost:8000/api/countries/', this.newCountry);
+        const response = await api.post('/api/countries/', this.newCountry); // Используем api для запроса
         // Добавление страны в список
         this.countries.push(response.data);
         // Закрытие формы
@@ -166,7 +166,7 @@ export default {
     async deleteCountry(index) {
       const countryCode = this.countries[index].code;
       try {
-        await axios.delete(`http://localhost:8000/api/countries/${countryCode}`);
+        await api.delete(`/api/countries/${countryCode}`); // Используем api для запроса
         // Удаление из списка
         this.countries.splice(index, 1);
       } catch (error) {
@@ -186,7 +186,7 @@ export default {
     async updateCountry() {
       const updatedCountry = this.newCountry;
       try {
-        await axios.put(`http://localhost:8000/api/countries/${updatedCountry.code}`, updatedCountry);
+        await api.put(`/api/countries/${updatedCountry.code}`, updatedCountry); // Используем api для запроса
         this.countries[this.selectedCountryIndex] = updatedCountry;
         this.cancelCountryForm();
       } catch (error) {
@@ -200,6 +200,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 /* Полоса на всю ширину страницы */
