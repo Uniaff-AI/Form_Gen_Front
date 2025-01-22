@@ -2,7 +2,6 @@
   <div>
     <div class="full-width-bar">
       <div class="bar-content">
-        <router-link to="/geo" class="bar-item">GEO</router-link>
         <router-link to="/offers" class="bar-item">OFFER</router-link>
       </div>
     </div>
@@ -116,7 +115,7 @@
           </td>
           <td>
             <div class="open-link-container">
-              <a :href="`http://localhost:8000/static/offers/offer_${offer.id}.html`" target="_blank">
+              <a :href="`${apiBaseUrl}/static/offers/offer_${offer.id}.html`" target="_blank">
                 <button class="button open-link is-small is-rounded">
                   <span>Открыть</span>
                 </button>
@@ -195,6 +194,11 @@ export default {
       const start = (this.currentPage - 1) * this.offersPerPage;
       const end = start + this.offersPerPage;
       return this.filteredOffers.slice(start, end);
+    },
+
+    // Вычисляемое свойство для базового URL
+    apiBaseUrl() {
+      return import.meta.env.VITE_API_BASE_URL; // Используем переменную окружения
     }
   },
   watch: {
@@ -326,6 +330,7 @@ export default {
   }
 };
 </script>
+
 
 
 <style scoped>
