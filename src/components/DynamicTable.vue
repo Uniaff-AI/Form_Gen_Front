@@ -186,6 +186,7 @@ export default {
       totalPages: 1,
       offersPerPage: 10,
       selectedCountry: '',  // Добавленное поле для выбранной страны
+      isDarkTheme: false,  // Состояние для текущей темы
     };
   },
   computed: {
@@ -210,6 +211,23 @@ export default {
     }
   },
   methods: {
+    // Метод для применения темы (темной или светлой)
+    applyTheme() {
+      if (this.isDarkTheme) {
+        document.body.classList.add('dark-theme');
+        document.body.classList.remove('light-theme');
+      } else {
+        document.body.classList.add('light-theme');
+        document.body.classList.remove('dark-theme');
+      }
+    },
+
+    // Слушаем изменения предпочтений темы в системе
+    handleThemeChange(event) {
+      this.isDarkTheme = event.matches; // Обновляем тему в зависимости от системных настроек
+      this.applyTheme();
+    },
+
     // Загружаем офферы для выбранной страны
     async fetchOffers() {
       try {
@@ -291,7 +309,7 @@ export default {
     // Удаление оффера
     async deleteOffer(id) {
       try {
-        await api.delete(`/api/offers/${id}/`);
+        await api.delete(`/api/offers/${id}`);
         this.offers = this.offers.filter(offer => offer.id !== id);
         this.filterOffers();
       } catch (error) {
@@ -323,21 +341,181 @@ export default {
     }
   },
 
-  // При монтировании компонента, загружаем данные
+  // При монтировании компонента, загружаем данные и настраиваем тему
   mounted() {
     this.fetchGeoData();
     this.fetchOffers();
+
+    // Проверяем системные предпочтения
+    this.isDarkTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    this.applyTheme();
+
+    // Добавляем слушатель изменений предпочтений темы
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.handleThemeChange);
   }
 };
 </script>
 
 
 
+
 <style scoped>
+/* Темная тема */
+.dark-theme {
+  background-color: #121212; /* Очень темный фон */
+  color: #e0e0e0; /* Светлый цвет текста */
+}
+
+.dark-theme .full-width-bar {
+  background-color: #1e1e1e; /* Темный цвет полосы */
+}
+
+.dark-theme .container {
+  background-color: #1f1f1f; /* Темный фон контейнера */
+}
+
+.dark-theme .add-offer-button {
+  background-color: #1e1e1e; /* Темный цвет кнопки */
+  color: #f1f1f1;
+}
+
+.dark-theme .pagination-previous,
+.dark-theme .pagination-next {
+  color: #1e88e5; /* Голубой цвет кнопок */
+}
+
+.dark-theme .pagination-link {
+  color: #1e88e5;
+}
+
+.dark-theme .button.is-primary {
+  background-color: #1e88e5;
+  color: white;
+}
+
+.dark-theme .button.is-light {
+  background-color: #333;
+  color: #ccc;
+}
+
+.dark-theme .table {
+  background-color: #181818; /* Черный фон таблицы */
+  color: #e0e0e0; /* Светлый текст */
+}
+
+.dark-theme .table th,
+.dark-theme .table td {
+  border: 1px solid #333; /* Темные границы */
+}
+
+.dark-theme .table tr:nth-child(odd) {
+  background-color: #242424; /* Чередующиеся строки */
+}
+
+.dark-theme .table tr:nth-child(even) {
+  background-color: #1f1f1f; /* Чередующиеся строки */
+}
+
+.dark-theme .input {
+  background-color: #333;
+  color: #f1f1f1;
+}
+
+.dark-theme .input:focus {
+  border-color: #1e88e5;
+}
+
+/* Светлая тема */
+.light-theme {
+  background-color: #f4f4f4; /* Светлый фон */
+  color: #333; /* Тёмный текст */
+}
+
+.light-theme .full-width-bar {
+  background-color: #fff; /* Белая полоса */
+}
+
+.light-theme .container {
+  background-color: #fff; /* Белый фон контейнера */
+}
+
+.light-theme .add-offer-button {
+  background-color: #e0e0e0; /* Светлая кнопка */
+  color: #333;
+}
+
+.light-theme .add-offer-button:hover {
+  background-color: #d0d0d0; /* Светлый серый при наведении */
+}
+
+.light-theme .pagination-previous,
+.light-theme .pagination-next {
+  color: #333;
+}
+
+.light-theme .pagination-link {
+  color: #1e88e5;
+}
+
+.light-theme .pagination-link.is-current {
+  background-color: #1e88e5;
+  color: white;
+}
+
+.light-theme .button.is-primary {
+  background-color: #1e88e5;
+  color: white;
+}
+
+.light-theme .button.is-light {
+  background-color: #fff;
+  color: #333;
+}
+
+.light-theme .table {
+  background-color: #fff; /* Белый фон таблицы */
+  color: #333; /* Тёмный текст */
+}
+
+.light-theme .table th,
+.light-theme .table td {
+  border: 1px solid #ddd; /* Светлые границы */
+}
+
+.light-theme .table tr:nth-child(odd) {
+  background-color: #f9f9f9; /* Чередующиеся строки */
+}
+
+.light-theme .table tr:nth-child(even) {
+  background-color: #f4f4f4; /* Чередующиеся строки */
+}
+
+.light-theme .input {
+  background-color: #fff;
+  color: #333;
+}
+
+.light-theme .input:focus {
+  border-color: #1e88e5;
+}
+
+/* Модальное окно */
+.light-theme .modal-content {
+  background-color: #ffffff; /* Белый фон модального окна */
+  color: #333; /* Темный текст в светлой теме */
+}
+
+.light-theme .modal-close.is-large {
+  color: #333; /* Цвет крестика для закрытия */
+}
+
+.light-theme .modal-close.is-large:hover {
+  color: #1e88e5; /* Голубой цвет при наведении на крестик */
+}
+
 /* Полоса на всю ширину страницы */
 .full-width-bar {
-  background-color: #1e1e1e; /* Темный цвет полосы */
-  padding: 20px 0; /* Увеличиваем padding для увеличения высоты полосы */
+  padding: 20px 0;
   width: 100%;
 }
 
@@ -347,7 +525,6 @@ export default {
 }
 
 .bar-item {
-  color: #f1f1f1;
   font-weight: bold;
   padding: 0 20px;
   text-decoration: none;
@@ -357,35 +534,16 @@ export default {
   background-color: #333;
 }
 
-/* Основной фон страницы */
-body {
-  background-color: #121212; /* Очень темный фон */
-  font-family: 'Roboto', sans-serif; /* Приятный шрифт */
-  color: #e0e0e0; /* Светлый цвет текста */
-}
-
-/* Контейнер с ограничением ширины и отступами */
-.container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 20px;
-  background-color: #1f1f1f; /* Темный фон контейнера */
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Легкая тень для контейнера */
-  margin-top: 30px; /* Добавляем отступ сверху, чтобы таблица не была в упор к полосе */
-}
-
-/* Кнопка "Добавить Оффер" такого же цвета, как и полоса сверху */
+/* Кнопка "Добавить Оффер" */
 .add-offer-button {
-  background-color: #1e1e1e; /* Темный цвет кнопки */
   color: #f1f1f1;
 }
 
 .add-offer-button:hover {
-  background-color: #333; /* Тёмный серый при наведении */
+  background-color: #333;
 }
 
-/* Стили для пагинации */
+/* Пагинация */
 .pagination {
   display: flex;
   justify-content: center;
@@ -395,22 +553,21 @@ body {
 
 .pagination-previous,
 .pagination-next {
-  color: #1e88e5; /* Голубой цвет кнопок по умолчанию */
+  color: #1e88e5;
 }
 
 .pagination-previous.disabled,
 .pagination-next.disabled {
-  color: #666; /* Тускло серый цвет, когда кнопки неактивны */
-  cursor: not-allowed; /* Убираем возможность клика */
+  color: #666;
+  cursor: not-allowed;
 }
 
 .pagination-previous:hover:not(.disabled),
 .pagination-next:hover:not(.disabled) {
-  background-color: #333; /* При наведении на активные кнопки */
+  background-color: #333;
 }
 
 .pagination-link {
-  color: #1e88e5;
   padding: 0.5rem 1rem;
   margin: 0 3px;
   cursor: pointer;
@@ -451,7 +608,7 @@ body {
 }
 
 .button.is-primary:hover {
-  background-color: #039be5; /* Голубой при наведении */
+  background-color: #039be5;
 }
 
 .button.is-light {
@@ -476,7 +633,7 @@ body {
   width: 60%;
   max-width: 900px;
   padding: 20px;
-  background-color: #212121; /* Темный фон для модального окна */
+  background-color: #212121;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
@@ -496,38 +653,21 @@ body {
 /* Таблица */
 .table {
   width: 100%;
-  background-color: #181818; /* Черный фон таблицы */
-  color: #e0e0e0; /* Светлый текст для таблицы */
-  border-collapse: collapse; /* Убираем отступы между ячейками */
+  border-collapse: collapse;
 }
 
 .table th,
 .table td {
-  border: 1px solid #333; /* Темные границы ячеек */
   padding: 10px;
   text-align: left;
 }
 
 .table th {
-  background-color: #222; /* Темный фон для заголовков */
   font-weight: bold;
-  color: #e0e0e0; /* Белый текст в заголовках */
-}
-
-.table tr:nth-child(odd) {
-  background-color: #242424; /* Чередующиеся строки с темным фоном */
-}
-
-.table tr:nth-child(even) {
-  background-color: #1f1f1f; /* Чередующиеся строки с чуть светлее темным фоном */
-}
-
-.table tr:hover {
-  background-color: #333; /* Подсветка строки при наведении */
 }
 
 .table td a {
-  color: #1e88e5; /* Голубой цвет для ссылок в таблице */
+  color: #1e88e5;
 }
 
 .table td a:hover {
@@ -535,40 +675,35 @@ body {
 }
 
 .table td .icon {
-  font-size: 2.5rem; /* Увеличиваем размер иконки */
-  display: flex; /* Включаем flexbox для центрирования */
-  justify-content: center; /* Горизонтальное центрирование */
-  align-items: center; /* Вертикальное центрирование */
-  height: 100%; /* Используем всю высоту ячейки для выравнивания */
+  font-size: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
-/* Дополнительное стилизование ссылки с иконкой для корректного центрирования */
 .table td a {
-  display: flex; /* Включаем flex для выравнивания иконки */
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Стили для ввода текста (поле поиска и форма добавления) */
 .input {
-  border-radius: 4px; /* Легкое округление */
+  border-radius: 4px;
   padding: 0.5rem 1rem;
   font-size: 1rem;
   border: 1px solid #555;
-  background-color: #333; /* Темный фон для полей ввода */
-  color: #f1f1f1;
 }
 
 .input:focus {
-  border-color: #1e88e5; /* Голубая обводка при фокусе */
+  border-color: #1e88e5;
   outline: none;
 }
 
 .input.is-rounded {
-  border-radius: 4px; /* Легкое округление */
+  border-radius: 4px;
 }
 
-/* Стили для формы */
 .form-control {
   margin-bottom: 1rem;
 }
@@ -576,11 +711,6 @@ body {
 .form-control label {
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: #f1f1f1; /* Белый текст для меток */
-}
-
-.form-control .input {
-  width: 100%;
 }
 
 .open-link-container {
@@ -589,7 +719,6 @@ body {
   align-items: center;
 }
 
-/* Стили для кнопки "Открыть" */
 .open-link {
   background-color: #1e88e5;
   color: white;
