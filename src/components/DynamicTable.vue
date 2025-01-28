@@ -58,18 +58,10 @@
               <input v-model="newOffer.discount" class="input" type="number" placeholder="Скидка (%)" />
             </div>
           </div>
-          <div class="field">
-            <label class="label">Текст кнопки</label>
-            <div class="control">
-              <input v-model="newOffer.buttonText" class="input" type="text" placeholder="Текст кнопки" />
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Описание</label>
-            <div class="control">
-              <input v-model="newOffer.description" class="input" type="text" placeholder="Описание" />
-            </div>
-          </div>
+          <!-- УДАЛЁННЫЕ ПОЛЯ:
+               Текст кнопки
+               Описание
+          -->
           <div class="field">
             <label class="label">Изображение</label>
             <div class="control">
@@ -91,8 +83,7 @@
           <th>Гео</th>
           <th>Цена</th>
           <th>Скидка (%)</th>
-          <th>Текст кнопки</th>
-          <th>Описание</th>
+          <!-- Убрали колонки "Текст кнопки" и "Описание" -->
           <th>Изображение</th>
           <th>Ссылка Оффера</th>
           <th>Действия</th>
@@ -104,8 +95,7 @@
           <td>{{ offer.geo }}</td>
           <td>{{ offer.price }}</td>
           <td>{{ offer.discount }}</td>
-          <td>{{ offer.buttonText || 'Нет текста' }}</td>
-          <td>{{ offer.description }}</td>
+          <!-- Удаляем соответствующие ячейки -->
           <td>
             <a :href="offer.image" target="_blank">
                 <span class="icon">
@@ -159,7 +149,6 @@
   </div>
 </template>
 
-
 <script>
 import api from '@/services/api';
 
@@ -171,12 +160,12 @@ export default {
       searchQuery: '',
       newOffer: {
         offer: '',
-        geo: '', // Название страны
-        countryCode: '', // Код страны
+        geo: '',        // Название страны
+        countryCode: '',// Код страны
         price: null,
         discount: null,
-        buttonText: '',
-        description: '',
+        // buttonText: '',   Удалено
+        // description: '',  Удалено
         image: ''
       },
       offers: [],
@@ -185,21 +174,18 @@ export default {
       currentPage: 1,
       totalPages: 1,
       offersPerPage: 10,
-      selectedCountry: '',  // Добавленное поле для выбранной страны
-      isDarkTheme: false,  // Состояние для текущей темы
+      selectedCountry: '',
+      isDarkTheme: false
     };
   },
   computed: {
-    // Пагинация: выбираем офферы для текущей страницы
     paginatedOffers() {
       const start = (this.currentPage - 1) * this.offersPerPage;
       const end = start + this.offersPerPage;
       return this.filteredOffers.slice(start, end);
     },
-
-    // Вычисляемое свойство для базового URL
     apiBaseUrl() {
-      return import.meta.env.VITE_API_BASE_URL; // Используем переменную окружения
+      return import.meta.env.VITE_API_BASE_URL;
     }
   },
   watch: {
@@ -207,11 +193,10 @@ export default {
       this.filterOffers();
     },
     selectedCountry() {
-      this.fetchOffers();  // Загружаем офферы при смене страны
+      this.fetchOffers();
     }
   },
   methods: {
-    // Метод для применения темы (темной или светлой)
     applyTheme() {
       if (this.isDarkTheme) {
         document.body.classList.add('dark-theme');
@@ -221,29 +206,20 @@ export default {
         document.body.classList.remove('dark-theme');
       }
     },
-
-    // Слушаем изменения предпочтений темы в системе
     handleThemeChange(event) {
-      this.isDarkTheme = event.matches; // Обновляем тему в зависимости от системных настроек
+      this.isDarkTheme = event.matches;
       this.applyTheme();
     },
-
-    // Загружаем офферы для выбранной страны
     async fetchOffers() {
       try {
         const response = await api.get(`/api/offers/?country=${this.selectedCountry}`);
-        this.offers = response.data.map(offer => ({
-          ...offer,
-          buttonText: offer.button_text,
-        }));
+        this.offers = response.data;
         this.filterOffers();
       } catch (error) {
         console.error('Ошибка при загрузке офферов:', error);
         alert('Не удалось загрузить офферы. Пожалуйста, попробуйте позже.');
       }
     },
-
-    // Загружаем данные стран (гео)
     async fetchGeoData() {
       try {
         const response = await api.get('/api/countries/');
@@ -253,8 +229,6 @@ export default {
         alert('Не удалось загрузить список стран. Пожалуйста, попробуйте позже.');
       }
     },
-
-    // Фильтрация офферов по поисковому запросу
     filterOffers() {
       const query = this.searchQuery.toLowerCase();
       this.filteredOffers = this.offers.filter(offer =>
@@ -263,26 +237,20 @@ export default {
       );
       this.totalPages = Math.ceil(this.filteredOffers.length / this.offersPerPage);
     },
-
-    // Добавление нового оффера
     async addOffer() {
-      // Проверка на обязательные поля
       if (!this.newOffer.offer || !this.newOffer.geo || this.newOffer.price == null || this.newOffer.discount == null || !this.newOffer.image) {
         alert('Пожалуйста, заполните все обязательные поля!');
         return;
       }
-
-      // Проверка на корректность URL изображения
       if (!this.isValidUrl(this.newOffer.image)) {
         alert('Пожалуйста, укажите корректный URL для изображения.');
         return;
       }
-
-      // Отправка оффера на сервер
       try {
         const response = await api.post('/generate_offer/', this.newOffer);
-        this.offers.push(response.data);
-        this.filterOffers();
+        // После добавления оффера можно либо заново загрузить список офферов, либо
+        // просто "добавить" в текущий массив. Ниже вариант подгрузки заново:
+        this.fetchOffers();
         this.showForm = false;
         this.cancelForm();
       } catch (error) {
@@ -290,23 +258,17 @@ export default {
         alert('Не удалось добавить оффер. Пожалуйста, попробуйте позже.');
       }
     },
-
-    // Закрытие формы добавления оффера
     cancelForm() {
       this.showForm = false;
       this.newOffer = {
         offer: '',
         geo: '',
-        countryCode: '', // Очистка кода страны
+        countryCode: '',
         price: null,
         discount: null,
-        buttonText: '',
-        description: '',
         image: ''
       };
     },
-
-    // Удаление оффера
     async deleteOffer(id) {
       try {
         await api.delete(`/api/offers/${id}`);
@@ -317,44 +279,32 @@ export default {
         alert('Не удалось удалить оффер. Пожалуйста, попробуйте позже.');
       }
     },
-
-    // Обработчик выбора страны из выпадающего списка
     setCountryCode() {
-      // Находим страну по имени и сохраняем её код
       const selectedCountry = this.geoData.find(country => country.name === this.newOffer.geo);
       if (selectedCountry) {
         this.newOffer.countryCode = selectedCountry.code;
       }
     },
-
-    // Пагинация: смена страницы
     changePage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
       }
     },
-
-    // Проверка на валидный URL
     isValidUrl(url) {
       const pattern = /^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
       return pattern.test(url);
     }
   },
-
-  // При монтировании компонента, загружаем данные и настраиваем тему
   mounted() {
     this.fetchGeoData();
     this.fetchOffers();
-
-    // Проверяем системные предпочтения
     this.isDarkTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     this.applyTheme();
-
-    // Добавляем слушатель изменений предпочтений темы
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.handleThemeChange);
   }
 };
 </script>
+
 
 
 
